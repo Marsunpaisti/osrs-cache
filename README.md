@@ -102,5 +102,8 @@ java -cp "<build>/_deps/runelite-cache-1.13.5/*" oracle/RuneLiteOracle.java <cac
 Most of the code is ported from RuneLite's cache library
 (`LICENSE-runelite.txt`, BSD 2-Clause and one MIT file), and the skeletal
 animations from rs-map-viewer (`LICENSE-rs-map-viewer.txt`, BSD 2-Clause).
-zlib and bzip2 come under their own licences. The game cache is Jagex's and is
-not part of this library.
+Those parts stay under their licences, so keep both notices when you
+distribute this library. Everything else, and the changes made in porting, is
+under the Zero-Clause BSD licence (`LICENSE`): use it for anything, no
+attribution needed. zlib and bzip2 come under their own licences. The game
+cache is Jagex's and is not part of this library.
