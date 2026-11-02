@@ -1,0 +1,102 @@
+Most of this library is ported from RuneLite's cache library 1.13.5
+(net.runelite:cache, https://github.com/runelite/runelite/tree/master/cache).
+Paths below are under its net/runelite/cache/:
+
+- src/store.cpp, src/buffer.h: fs/Container, fs/Archive, fs/Index,
+  fs/ArchiveFiles, fs/jagex/DiskStorage, fs/jagex/IndexFile,
+  fs/jagex/DataFile, fs/flat/FlatStorage, index/IndexData, io/InputStream,
+  util/Xtea, util/Djb2
+- src/definitions.cpp: definitions/loaders NpcLoader, ItemLoader,
+  ObjectLoader, SequenceLoader, KitLoader, SpotAnimLoader, UnderlayLoader,
+  OverlayLoader, HitSplatLoader, HealthBarLoader and EntityOpsLoader, their
+  definitions, EntityOpsDefinition and ItemManager
+- src/configs.cpp: definitions/loaders EnumLoader, ParamLoader,
+  VarbitLoader, StructLoader, InventoryLoader, AreaLoader, DBRowLoader,
+  DBTableLoader, DBTableIndexLoader and GameValLoader, their definitions,
+  DBTableIndexManager, util/ScriptVarType and util/BaseVarType
+- src/interfaces.cpp, src/scripts.cpp, src/disassembler.cpp:
+  definitions/loaders InterfaceLoader and ScriptLoader, their definitions,
+  definitions/ClientScript1Instruction, InterfaceManager,
+  script/disassembler/Disassembler, script/Instructions, script/Opcodes,
+  script/RuneLiteInstructions and script/RuneLiteOpcodes
+- src/map.cpp: definitions/loaders MapLoader and LocationsLoader, their
+  definitions, region/RegionLoader, region/Region, region/Location,
+  region/Position, region/HeightCalc and util/KeyProvider
+- src/model.cpp, src/frames.cpp: definitions/loaders ModelLoader,
+  FrameLoader and FramemapLoader, their definitions (ModelDefinition's
+  computeNormals, computeTextureUVCoordinates and computeAnimationTables),
+  models/VertexNormal and models/FaceNormal
+- src/sprites.cpp: definitions/loaders SpriteLoader, FontLoader and
+  TextureLoader, and their definitions (SpriteDefinition.normalize,
+  TextureDefinition.method2680)
+- src/worldmap.cpp, src/audio.cpp: definitions/loaders WorldMapLoader,
+  WorldMapCompositeLoader, WorldMapDataLoader, WorldMapElementLoader,
+  TrackLoader and sound/SoundEffectLoader with SoundEffect1Loader to
+  SoundEffect3Loader, their definitions, WorldMapManager, io/OutputStream
+  and region/Position
+
+All of it is under this licence, except HeightCalc, whose licence follows it.
+The files without a notice of their own (ModelLoader, ModelDefinition,
+VertexNormal, FaceNormal, Djb2) are under the repository's, the first below.
+
+BSD 2-Clause License
+
+Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+Copyright (c) 2017, Adam <Adam@sigterm.info>
+Copyright (c) 2018, Adam <Adam@sigterm.info>
+Copyright (c) 2020, Adam <Adam@sigterm.info>
+Copyright (c) 2021, Adam <Adam@sigterm.info>
+Copyright (c) 2018-2019, Hunter WB <hunterwb.com>
+Copyright (c) 2018 Abex
+Copyright (c) 2019, Abex
+Copyright (c) 2022 Abex
+Copyright (c) 2025 Abex
+Copyright (c) 2026 Abex
+Copyright (c) 2018, Joshua Filby <joshua@filby.me>
+Copyright (c) 2022, Joshua Filby <joshua@filby.me>
+Copyright (c) 2020, Hexagon <hexagon@fking.work>
+Copyright (c) 2020, Trevor <https://github.com/Trevor159>
+Copyright (c) 2024, Christopher Brown <christoabrown@gmail.com>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+region/HeightCalc, ported in src/map.cpp (HeightNoise), is under this licence:
+
+Copyright (c) 2015 Kyle Friz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
