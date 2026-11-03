@@ -1,8 +1,8 @@
 # osrs_cache: the game's cache on disk, everything RuneLite's cache library
 # reads from it (configs, interfaces, scripts, maps, models, animations,
-# sprites, textures, the world map, music and sound effects), plus static
-# collision and skeletal animations. Pure C++20 over zlib and bzip2, which
-# cmake/ fetches.
+# sprites, textures, the world map, music and sound effects) and the item
+# icons it draws, plus static collision and skeletal animations. Pure C++20
+# over zlib and bzip2, which cmake/ fetches.
 #
 # Nothing in this folder may depend on anything outside it, so that it can be
 # copied into another project as it is (README.md): added there with
@@ -21,7 +21,9 @@ add_library(osrs_cache STATIC
     src/definitions.cpp
     src/disassembler.cpp
     src/frames.cpp
+    src/graphics3d.cpp
     src/interfaces.cpp
+    src/item_icons.cpp
     src/map.cpp
     src/model.cpp
     src/scripts.cpp
@@ -33,6 +35,11 @@ add_library(osrs_cache STATIC
 target_include_directories(osrs_cache PUBLIC include)
 target_compile_features(osrs_cache PUBLIC cxx_std_20)
 target_link_libraries(osrs_cache PRIVATE osrs_cache_zlib osrs_cache_bzip2)
+# The item icon rasterizer relies on int arithmetic wrapping as Java's does.
+# MSVC has no such flag; the oracle checks its build's pixels against RuneLite's.
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang" AND NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+    set_source_files_properties(src/graphics3d.cpp src/item_icons.cpp PROPERTIES COMPILE_OPTIONS -fwrapv)
+endif()
 
 option(OSRS_CACHE_BUILD_TESTS "Build osrs_cache_tests" ${PROJECT_IS_TOP_LEVEL})
 set(OSRS_CACHE_DIR "" CACHE PATH "The copy of the game cache osrs_cache_tests reads")
@@ -70,6 +77,7 @@ if(OSRS_CACHE_ORACLE)
         oracle/dump_definitions.cpp
         oracle/dump_graphics.cpp
         oracle/dump_interfaces.cpp
+        oracle/dump_item_icons.cpp
         oracle/dump_maps.cpp
         oracle/dump_scripts.cpp
         oracle/dump_storage.cpp

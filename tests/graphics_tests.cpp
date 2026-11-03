@@ -1,10 +1,11 @@
-// What RuneLite's ModelDefinition computes as a model loads, and the texture
-// sizes TextureDefinition.method2680 makes, on the cache copy cache_tests.cpp
-// reads. The oracle compares every value; these pin the cases a change would
-// most easily break.
+// What RuneLite's ModelDefinition computes as a model loads, the texture
+// sizes TextureDefinition.method2680 makes, and item icons, on the cache copy
+// cache_tests.cpp reads. The oracle compares every value; these pin the cases
+// a change would most easily break.
 
 #include <doctest/doctest.h>
 
+#include <osrs/cache/item_icons.h>
 #include <osrs/cache/model.h>
 #include <osrs/cache/sprites.h>
 #include <osrs/cache/store.h>
@@ -79,4 +80,41 @@ TEST_CASE("a texture's pixels at the sizes RuneLite makes from a 128-wide sprite
     }
     // Any other size of a sprite that isn't as wide fails, as in RuneLite.
     CHECK_THROWS_AS(texturePixels(*store(), *found, 0.8, 32), std::runtime_error);
+}
+
+TEST_CASE("an item icon is 36 by 32 opaque or empty pixels, outlined in black") {
+    if (store() == nullptr) return;
+    ItemIconRenderer renderer(*store());
+    // The abyssal whip.
+    const std::optional<Sprite> icon = renderer.render(4151);
+    REQUIRE(icon.has_value());
+    CHECK(icon->width == 36);
+    CHECK(icon->height == 32);
+    REQUIRE(icon->pixels.size() == 36u * 32u);
+    int outline = 0, shadow = 0, empty = 0;
+    for (const std::uint32_t pixel : icon->pixels) {
+        CHECK((pixel == 0 || pixel >> 24 == 0xFF));
+        outline += pixel == 0xFF000001 ? 1 : 0;
+        shadow += pixel == (0xFF000000 | kItemIconShadow) ? 1 : 0;
+        empty += pixel == 0 ? 1 : 0;
+    }
+    CHECK(outline > 0);
+    CHECK(shadow > 0);
+    CHECK(empty > 0);
+}
+
+TEST_CASE("a stack of coins shows the model of its size") {
+    if (store() == nullptr) return;
+    ItemIconRenderer renderer(*store());
+    const std::optional<Sprite> one = renderer.render(995, 1);
+    const std::optional<Sprite> many = renderer.render(995, 10000);
+    REQUIRE(one.has_value());
+    REQUIRE(many.has_value());
+    CHECK(one->pixels != many->pixels);
+}
+
+TEST_CASE("an item the cache lacks has no icon") {
+    if (store() == nullptr) return;
+    CHECK_FALSE(loadItemIcon(*store(), 1000000).has_value());
+    CHECK_FALSE(loadItemIcon(*store(), -1).has_value());
 }

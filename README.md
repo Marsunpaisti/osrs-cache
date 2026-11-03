@@ -3,7 +3,8 @@
 Reads Old School RuneScape's game cache as the official client stores it on
 disk (`main_file_cache.dat2` and its `.idx` files), and decodes everything
 RuneLite's cache library (`net.runelite:cache` 1.13.5) reads from it, field
-for field. C++20, read-only, no network.
+for field, and draws item icons as it does, pixel for pixel. C++20,
+read-only, no network.
 
 This folder is self-contained: copy it into another project as it is.
 
@@ -62,6 +63,7 @@ RuneLite fails on them too, and reports them.
 | `osrs/cache/model.h`, `frames.h` | models with their normals and texture coordinates, frame maps and animation frames |
 | `osrs/cache/skeletal.h` | skeletal animations (not in RuneLite) |
 | `osrs/cache/sprites.h` | sprites, fonts, and textures with their pixels |
+| `osrs/cache/item_icons.h` | item icons, the inventory's 36 by 32 pictures, drawn from the items' models in software |
 | `osrs/cache/worldmap.h` | the world map: its areas, composite maps, elements and intermap links |
 | `osrs/cache/audio.h` | music tracks and jingles as MIDI files, and sound effects |
 
@@ -76,8 +78,9 @@ The older formats are ported but only unit-tested, as the current cache has
 none. Deliberate departures from RuneLite, each noted where it's made:
 object offsets are read signed, as the client reads them; an unknown opcode
 in a `definitions.h` type fails its object (above) instead of being read
-past; and animation frames of
-more than 500 transforms decode, where RuneLite's fail.
+past; animation frames of more than 500 transforms decode, where RuneLite's
+fail; and an item icon drawn from an item the cache lacks is nothing, where
+RuneLite fails.
 
 ## Checked against RuneLite
 
@@ -86,9 +89,11 @@ more than 500 transforms decode, where RuneLite's fail.
 `osrs_cache_dump` and the `osrs_cache_oracle` test. The oracle
 (`oracle/RuneLiteOracle.java`) has RuneLite decode the same cache, each type
 loaded as RuneLite's managers load it, and compares every object's fields with
-this library's. On the 2026-11-01 cache all 41 types agree, including where
-RuneLite fails to decode an object; the storage and region types also agree
-on RuneLite's flat copy of it and on a 2026-03-18 cache from the OpenRS2
+this library's; it also has RuneLite draw every item's icon, with three sets
+of options, and compares the pixels. On the 2026-11-01 cache all 44 types
+agree, including where RuneLite fails to decode an object; the storage and
+region types also agree on RuneLite's flat copy of it and on a 2026-03-18
+cache from the OpenRS2
 archive, whose maps are named and encrypted (`--xtea <keys.json>`). After a
 game update, run it on the new cache, with a newer RuneLite if Jagex changed
 a format, to see what changed:

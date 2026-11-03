@@ -22,6 +22,7 @@
 // ascending key order and compared one at a time, as the models and maps
 // don't fit in memory together.
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,6 +52,7 @@ import java.util.concurrent.Callable;
 import net.runelite.cache.ConfigType;
 import net.runelite.cache.IndexType;
 import net.runelite.cache.ItemManager;
+import net.runelite.cache.TextureManager;
 import net.runelite.cache.WorldMapManager;
 import net.runelite.cache.definitions.FramemapDefinition;
 import net.runelite.cache.definitions.ItemDefinition;
@@ -60,6 +62,9 @@ import net.runelite.cache.definitions.ScriptDefinition;
 import net.runelite.cache.definitions.SpriteDefinition;
 import net.runelite.cache.definitions.TextureDefinition;
 import net.runelite.cache.definitions.WorldMapElementDefinition;
+import net.runelite.cache.definitions.providers.ItemProvider;
+import net.runelite.cache.definitions.providers.ModelProvider;
+import net.runelite.cache.definitions.providers.SpriteProvider;
 import net.runelite.cache.definitions.loaders.AreaLoader;
 import net.runelite.cache.definitions.loaders.DBRowLoader;
 import net.runelite.cache.definitions.loaders.DBTableIndexLoader;
@@ -96,6 +101,7 @@ import net.runelite.cache.fs.FSFile;
 import net.runelite.cache.fs.Index;
 import net.runelite.cache.fs.Store;
 import net.runelite.cache.fs.flat.FlatStorage;
+import net.runelite.cache.item.ItemSpriteFactory;
 import net.runelite.cache.region.Position;
 import net.runelite.cache.region.Region;
 import net.runelite.cache.region.RegionLoader;
@@ -151,6 +157,23 @@ public class RuneLiteOracle
 		{
 			lines = text.split("\n", -1);
 		}
+	}
+
+	// An item icon's ARGB pixels, row by row.
+	static final class Icon
+	{
+		final int[] pixels;
+
+		Icon(BufferedImage image)
+		{
+			pixels = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
+		}
+	}
+
+	// Thrown in place of handing ItemSpriteFactory a missing item, which it
+	// fails on where osrs_cache draws nothing.
+	private static final class MissingItem extends RuntimeException
+	{
 	}
 
 	private static final Map<String, Source> TYPES = new LinkedHashMap<>();
@@ -345,6 +368,81 @@ public class RuneLiteOracle
 		// As DBTableIndexManager loads them: file 0 is the master index, file n column n - 1.
 		TYPES.put("dbtableindex", store -> perFile(store, IndexType.DBTABLEINDEX, (archive, file, data) -> new DBTableIndexLoader().load(archive.getArchiveId(), file - 1, data)));
 		TYPES.put("gameval", store -> perFile(store, IndexType.GAMEVALS, (archive, file, data) -> new GameValLoader().load(archive.getArchiveId(), file, data)));
+		// Must stay the same as dump_item_icons.cpp's: as the inventory shows
+		// an item (as RuneLite's ItemSpriteFactoryTest draws them, with the
+		// client's SpritePixels.DEFAULT_SHADOW_COLOR); as the client shows a
+		// selected stack of 1000; and a large stack on a banknote, unbordered.
+		itemIcons("itemicon", 1, 1, 0x302020, false);
+		itemIcons("itemiconselected", 1000, 2, 0, false);
+		itemIcons("itemiconnoted", 100000, 0, 0x302020, true);
+	}
+
+	// Every item's icon, drawn with its linked definition, its models loaded
+	// as ModelLoader loads them and one TextureManager, whose textures keep
+	// their pixels from one icon to the next.
+	private static void itemIcons(String name, int quantity, int border, int shadowColor, boolean noted)
+	{
+		TYPES.put(name, store ->
+		{
+			ItemManager items = new ItemManager(store);
+			items.load();
+			items.link();
+			TextureManager textures = new TextureManager(store);
+			textures.load();
+			ItemProvider itemProvider = id ->
+			{
+				ItemDefinition item = items.provide(id);
+				if (item == null)
+				{
+					throw new MissingItem();
+				}
+				return item;
+			};
+			ModelProvider models = id ->
+			{
+				Archive archive = store.getIndex(IndexType.MODELS).getArchive(id);
+				if (archive == null)
+				{
+					return null;
+				}
+				FSFile file = archive.getFiles(store.getStorage().loadArchive(archive)).findFile(0);
+				return file == null ? null : new ModelLoader().load(id, file.getContents());
+			};
+			SpriteProvider sprites = (spriteId, frame) ->
+			{
+				try
+				{
+					Archive archive = store.getIndex(IndexType.SPRITES).getArchive(spriteId);
+					if (archive == null)
+					{
+						return null;
+					}
+					SpriteDefinition[] frames = new SpriteLoader().load(spriteId, archive.decompress(store.getStorage().loadArchive(archive)));
+					return frame < frames.length ? frames[frame] : null;
+				}
+				catch (IOException e)
+				{
+					throw new IllegalStateException(e);
+				}
+			};
+			List<Entry> entries = new ArrayList<>();
+			for (ItemDefinition item : items.getItems())
+			{
+				entries.add(new Entry(key(item.id), () ->
+				{
+					try
+					{
+						BufferedImage image = ItemSpriteFactory.createSprite(itemProvider, models, sprites, textures, item.id, quantity, border, shadowColor, noted);
+						return image == null ? null : new Icon(image);
+					}
+					catch (MissingItem e)
+					{
+						return null;
+					}
+				}));
+			}
+			return sorted(entries);
+		});
 	}
 
 	public static void main(String[] args) throws Exception

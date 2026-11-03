@@ -1,6 +1,7 @@
 #include <osrs/cache/sprites.h>
 
 #include "buffer.h"
+#include "colour.h"
 #include "undecodable.h"
 
 #include <algorithm>
@@ -81,7 +82,10 @@ std::vector<Sprite> decodeSprites(std::span<const std::uint8_t> bytes) {
     return sprites;
 }
 
-// RuneLite TextureDefinition.adjustRGB.
+} // namespace
+
+// RuneLite TextureDefinition.adjustRGB, and JagexColor.adjustForBrightness,
+// which computes the same.
 std::uint32_t adjustRgb(std::uint32_t rgb, double brightness) {
     const double r = std::pow(static_cast<double>(rgb >> 16) / 256.0, brightness);
     const double g = std::pow(static_cast<double>(rgb >> 8 & 255) / 256.0, brightness);
@@ -89,8 +93,6 @@ std::uint32_t adjustRgb(std::uint32_t rgb, double brightness) {
     return static_cast<std::uint32_t>(static_cast<int>(b * 256.0) + (static_cast<int>(g * 256.0) << 8)
                                       + (static_cast<int>(r * 256.0) << 16));
 }
-
-} // namespace
 
 std::optional<std::vector<Sprite>> loadSprites(const Store& store, int id) {
     const auto files = store.files(Index::Sprites, id);

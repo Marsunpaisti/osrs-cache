@@ -34,6 +34,10 @@ Paths below are under its net/runelite/cache/:
   TrackLoader and sound/SoundEffectLoader with SoundEffect1Loader to
   SoundEffect3Loader, their definitions, WorldMapManager, io/OutputStream
   and region/Position
+- src/item_icons.cpp, src/graphics3d.cpp, src/colour.h: item/ItemSpriteFactory,
+  item/Model, item/Graphics3D, item/Rasterizer2D, item/RSTextureProvider,
+  item/SpritePixels, item/Renderable, ModelDefinition's resize, recolor and
+  retexture, and models/JagexColor
 
 All of it is under this licence, except HeightCalc, whose licence follows it.
 The files without a notice of their own (ModelLoader, ModelDefinition,
@@ -49,6 +53,7 @@ Copyright (c) 2021, Adam <Adam@sigterm.info>
 Copyright (c) 2018-2019, Hunter WB <hunterwb.com>
 Copyright (c) 2018 Abex
 Copyright (c) 2019, Abex
+Copyright (c) 2020 Abex
 Copyright (c) 2022 Abex
 Copyright (c) 2025 Abex
 Copyright (c) 2026 Abex
